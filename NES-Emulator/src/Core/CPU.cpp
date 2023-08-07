@@ -67,101 +67,75 @@ uint16_t CPU::FetchByte()
 		}
 		case AddressMode::ABS:
 		{
-			uint8_t pt1 = m_RAM[m_PC++];
-			uint8_t pt2 = m_RAM[m_PC++];
-
-			return (pt2 << 8) | pt1;
+			return GetAddress(m_PC);
 		}
 		case AddressMode::ABSX:
 		{
-			uint8_t pt1 = m_RAM[m_PC++];
-			uint8_t pt2 = m_RAM[m_PC++];
+			uint16_t addrRel = GetAddress(m_PC);
+			uint16_t addrAbs = addrRel + m_X;
 
-			uint8_t val = ((pt2 << 8) | pt1) + m_X;
-
-			if (val > 255)
+			if ((addrAbs & 0xFF) != (addrRel & 0xFF))
 			{
-				val = val - 255;
-
 				if (m_CurrentInstruction->CanIncreaseCycles)
 					m_Cycles++;
 			}
 
-			return val;
+			return addrAbs;
 		}
 		case AddressMode::ABSY:
 		{
-			uint8_t pt1 = m_RAM[m_PC++];
-			uint8_t pt2 = m_RAM[m_PC++];
+			uint16_t addrRel = GetAddress(m_PC);
+			uint16_t addrAbs = addrRel + m_Y;
 
-			uint8_t val = ((pt2 << 8) | pt1) + m_Y;
-
-			if (val > 255)
+			if ((addrAbs & 0xFF) != (addrRel & 0xFF))
 			{
-				val = val - 255;
-
 				if (m_CurrentInstruction->CanIncreaseCycles)
 					m_Cycles++;
 			}
 
-			return val;
+			return addrAbs;
 		}
 		case AddressMode::IND:
 		{
-			uint8_t ptr1 = m_RAM[m_PC++];
-			uint8_t ptr2 = m_RAM[m_PC++];
-
-			const uint16_t ptr = (ptr2 << 8) | ptr1;
-
-			uint8_t real1 = m_RAM[ptr + 0];
-			uint8_t real2 = m_RAM[ptr + 1];
-
-			return (real2 << 8) | real1;
+			uint16_t ptr = GetAddress(m_PC);
+			return GetAddress(ptr);
 		}
 		case AddressMode::INDX: 
 		{
-			uint8_t ptr1 = m_RAM[m_PC++];
-			uint8_t ptr2 = m_RAM[m_PC++];
+			uint16_t ptr = GetAddress(m_PC) + m_X;
 
-			const uint16_t ptr = (ptr2 << 8) | ptr1;
-
-			uint8_t real1 = m_RAM[ptr + 0];
-			uint8_t real2 = m_RAM[ptr + 1];
-
-			uint8_t realVal = ((real2 << 8) | real1) + m_X;
-
-			if (realVal > 255)
-				realVal = realVal - 255;
-
-			return realVal;
-		}
-		case AddressMode::INDY:
-		{
-			uint8_t ptr1 = m_RAM[m_PC++];
-			uint8_t ptr2 = m_RAM[m_PC++];
-
-			const uint16_t ptr = (ptr2 << 8) | ptr1;
-
-			uint8_t real1 = m_RAM[ptr + 0];
-			uint8_t real2 = m_RAM[ptr + 1];
-
-			uint8_t realVal = ((real2 << 8) | real1) + m_Y;
-
-			if (realVal > 255)
+			if (ptr > 0xFF)
 			{
-				realVal = realVal - 255;
+				ptr = ptr - 0xFF;
 
 				if (m_CurrentInstruction->CanIncreaseCycles)
 					m_Cycles++;
 			}
 
-			return realVal;
+			return GetAddress(ptr);
+		}
+		case AddressMode::INDY:
+		{
+			uint16_t ptr = GetAddress(m_PC) + m_Y;
+			return GetAddress(ptr);
 		}
 		case AddressMode::ACC:
 		{
 			return m_A;
 		}
+		case AddressMode::REL:
+		{
+			return (int8_t)m_RAM[m_PC++];
+		}
 	}
+}
+
+uint16_t CPU::GetAddress(uint16_t& ptr)
+{
+	uint8_t lo = m_RAM[ptr++];
+	uint8_t hi = m_RAM[ptr++];
+
+	return (hi << 8) | lo;
 }
 
 #pragma region Instructions
@@ -195,6 +169,22 @@ void CPU::OP_ASL()
 	m_F.C = byte & 0x80;
 	m_F.Z = temp == 0;
 	m_F.N = temp & 0x80;
+}
+
+void CPU::OP_BCC()
+{
+	uint8_t byte = FetchByte();
+
+	if (!m_F.C)
+		m_PC += byte;
+}
+
+void CPU::OP_BCS()
+{
+	uint8_t byte = FetchByte();
+
+	if (m_F.C)
+		m_PC += byte;
 }
 
 #pragma endregion

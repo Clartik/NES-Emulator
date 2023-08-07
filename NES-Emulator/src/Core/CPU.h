@@ -15,6 +15,7 @@ public:
 	CPU();
 	~CPU();
 
+	// Get Byte
 	inline uint8_t Read(uint8_t address) const { return m_RAM[address]; }
 	inline void Write(uint8_t address, uint8_t data) { m_RAM[address] = data; }
 	void Write(uint8_t address, uint8_t* data, unsigned int size);
@@ -26,14 +27,15 @@ private:
 	void DecodeAndExecute(uint16_t instruction);
 
 	uint16_t FetchByte();
+	uint16_t GetAddress(uint16_t& ptr);
 
 	#pragma region OPCodes
 
 	void OP_ADC();
 	void OP_AND();
 	void OP_ASL();
-
-	void Helper_ASL();
+	void OP_BCC();
+	void OP_BCS(); 
 
 	#pragma endregion
 private:
@@ -70,7 +72,7 @@ private:
 		ZP, ZPX, ZPY,
 		ABS, ABSX, ABSY,
 		IND, INDX, INDY,
-		ACC
+		ACC, REL
 	};
 
 	struct Instruction
