@@ -2,32 +2,46 @@
 
 #include <stdint.h>
 #include <map>
+#include <functional>
 
 const unsigned int MEMORY_SIZE = 2048;
 
 // Stack is 256 to 511 (0x0100 - 0x01FF)
 const unsigned int STACK_START_ADDRESS = 0x0100;
 const unsigned int PC_START_ADDRESS = 0xFFFC;
+const unsigned int IRQ_INTERRUPT_ADDRESS = 0xFFFE;
 
 class CPU
 {
+private:
+	using OpCodeFn = std::function<void()>;
 public:
 	CPU();
 	~CPU();
 
-	// Get Byte
-	inline uint8_t Read(uint8_t address) const { return m_RAM[address]; }
-	inline void Write(uint8_t address, uint8_t data) { m_RAM[address] = data; }
-	void Write(uint8_t address, uint8_t* data, unsigned int size);
+	// Get 8-bit Byte
+	inline uint8_t& Read(uint16_t& address) { return m_RAM[address++]; }
+	inline void Write(uint16_t address, uint8_t data) { m_RAM[address] = data; }
+	void Write(uint16_t address, uint8_t* data, unsigned int size);
 
 	void Reset();
 private:
 	void Cycle();
-	uint16_t FetchOPCode();
-	void DecodeAndExecute(uint16_t instruction);
 
-	uint16_t FetchByte();
+	// Fetches the memory needed for certain instructions
+	uint8_t& FetchByte();
 	uint16_t GetAddress(uint16_t& ptr);
+
+	// Decided to implement stack by hand for "F U N"
+	#pragma region Stack
+
+	void PushToStack(uint8_t value);
+	void PushToStack(uint16_t value);
+
+	uint8_t PopFromStack();
+	uint16_t PopFromStackAddress();
+
+#pragma endregion
 
 	#pragma region OPCodes
 
@@ -35,9 +49,30 @@ private:
 	void OP_AND();
 	void OP_ASL();
 	void OP_BCC();
-	void OP_BCS(); 
+	void OP_BCS();
+	void OP_BEQ();
+	void OP_BIT();
+	void OP_BMI();
+	void OP_BNE();
+	void OP_BPL();
+	void OP_BRK();
+	void OP_BVC();
+	void OP_BVS();
+	void OP_CLC();
+	void OP_CLD();
+	void OP_CLI();
+	void OP_CLV();
+	void OP_CMP();
+	void OP_CPX();
+	void OP_CPY();
+	void OP_DEC();
 
-	#pragma endregion
+	// Implements Generic Instructions for instructions that change very little
+	void Helper_BranchIf(bool condition);
+	void Helper_Compare(uint8_t value);
+	void Helper_Decrement(uint8_t& value);
+
+#pragma endregion
 private:
 	// Acuumlator, X-Index, Y-Index, Stack Pointer
 	uint8_t m_A, m_X, m_Y, m_SP;
@@ -68,7 +103,8 @@ private:
 
 	enum class AddressMode
 	{
-		IMP = 0, IMM,
+		NONE = 0,
+		IMP, IMM,
 		ZP, ZPX, ZPY,
 		ABS, ABSX, ABSY,
 		IND, INDX, INDY,
@@ -77,11 +113,12 @@ private:
 
 	struct Instruction
 	{
+		OpCodeFn Func;
 		int Cycles;
 		AddressMode AddressMode;
-		bool CanIncreaseCycles;
+		bool CanIncreaseCycles;				// Needed because Certain instructions increment cycles
 	};
 
-	std::map<uint16_t, Instruction> m_Instructions;
+	std::map<uint8_t, Instruction> m_Instructions;
 	Instruction* m_CurrentInstruction;
 };
