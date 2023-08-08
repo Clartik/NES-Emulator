@@ -1,7 +1,215 @@
 #include "CPU.h"
 
+#include <iostream>
+
 CPU::CPU()
 {
+	m_Instructions = {
+		{ 0x69, { "ADC", BIND_OPCODE_FN(OP_ADC), AddressMode::IMM , 2, false } },
+		{ 0x65, { "ADC", BIND_OPCODE_FN(OP_ADC), AddressMode::ZP  , 3, false } },
+		{ 0x75, { "ADC", BIND_OPCODE_FN(OP_ADC), AddressMode::ZPX , 4, false } },
+		{ 0x6D, { "ADC", BIND_OPCODE_FN(OP_ADC), AddressMode::ABS , 4, false } },
+		{ 0x7D, { "ADC", BIND_OPCODE_FN(OP_ADC), AddressMode::ABSX, 4, true } },
+		{ 0x79, { "ADC", BIND_OPCODE_FN(OP_ADC), AddressMode::ABSY, 4, true } },
+		{ 0x61, { "ADC", BIND_OPCODE_FN(OP_ADC), AddressMode::INDX, 6, false } },
+		{ 0x71, { "ADC", BIND_OPCODE_FN(OP_ADC), AddressMode::INDY, 5, true } },
+
+		{ 0x29, { "AND", BIND_OPCODE_FN(OP_AND), AddressMode::IMM , 2, false } },
+		{ 0x25, { "AND", BIND_OPCODE_FN(OP_AND), AddressMode::ZP  , 3, false } },
+		{ 0x35, { "AND", BIND_OPCODE_FN(OP_AND), AddressMode::ZPX , 4, false } },
+		{ 0x2D, { "AND", BIND_OPCODE_FN(OP_AND), AddressMode::ABS , 4, false } },
+		{ 0x3D, { "AND", BIND_OPCODE_FN(OP_AND), AddressMode::ABSX, 4, true } },
+		{ 0x39, { "AND", BIND_OPCODE_FN(OP_AND), AddressMode::ABSY, 4, true } },
+		{ 0x21, { "AND", BIND_OPCODE_FN(OP_AND), AddressMode::INDX, 6, false } },
+		{ 0x31, { "AND", BIND_OPCODE_FN(OP_AND), AddressMode::INDY, 5, true } },
+
+		{ 0x0A, { "ASL", BIND_OPCODE_FN(OP_ASL), AddressMode::ACC, 2, false } },
+		{ 0x06, { "ASL", BIND_OPCODE_FN(OP_ASL), AddressMode::ZP, 5, false } },
+		{ 0x16, { "ASL", BIND_OPCODE_FN(OP_ASL), AddressMode::ZPX, 6, false } },
+		{ 0x0E, { "ASL", BIND_OPCODE_FN(OP_ASL), AddressMode::ABS, 6, false } },
+		{ 0x1E, { "ASL", BIND_OPCODE_FN(OP_ASL), AddressMode::ABSX, 7, false } },
+
+		{ 0x90, { "BCC", BIND_OPCODE_FN(OP_BCC), AddressMode::REL, 2, false } },
+
+		{ 0xB0, { "BCS", BIND_OPCODE_FN(OP_BCS), AddressMode::REL, 2, false } },
+
+		{ 0xF0, { "BEQ", BIND_OPCODE_FN(OP_BEQ), AddressMode::REL, 2, false } },
+
+		{ 0x24, { "BIT", BIND_OPCODE_FN(OP_BIT), AddressMode::ZP, 3, false } },
+		{ 0x2C, { "BIT", BIND_OPCODE_FN(OP_BIT), AddressMode::ABS, 4, false } },
+
+		{ 0x30, { "BMI", BIND_OPCODE_FN(OP_BMI), AddressMode::REL, 2, false } },
+
+		{ 0x10, { "BPL", BIND_OPCODE_FN(OP_BPL), AddressMode::REL, 2, false } },
+
+		{ 0x00, { "BRK", BIND_OPCODE_FN(OP_BRK), AddressMode::IMP, 7, false } },
+
+		{ 0x50, { "BVC", BIND_OPCODE_FN(OP_BVC), AddressMode::REL, 2, false } },
+
+		{ 0x70, { "BVS", BIND_OPCODE_FN(OP_BVS), AddressMode::REL, 2, false } },
+
+		{ 0x18, { "CLC", BIND_OPCODE_FN(OP_CLC), AddressMode::IMP, 2, false } },
+
+		{ 0xD8, { "CLD", BIND_OPCODE_FN(OP_CLD), AddressMode::IMP, 2, false } },
+
+		{ 0x58, { "CLI", BIND_OPCODE_FN(OP_CLI), AddressMode::IMP, 2, false } },
+
+		{ 0xB8, { "CLV", BIND_OPCODE_FN(OP_CLV), AddressMode::IMP, 2, false } },
+
+		{ 0xC9, { "CMP", BIND_OPCODE_FN(OP_CMP), AddressMode::IMM, 2, false } },
+		{ 0xC5, { "CMP", BIND_OPCODE_FN(OP_CMP), AddressMode::ZP, 3, false } },
+		{ 0xD5, { "CMP", BIND_OPCODE_FN(OP_CMP), AddressMode::ZPX, 4, false } },
+		{ 0xCD, { "CMP", BIND_OPCODE_FN(OP_CMP), AddressMode::ABS, 4, false } },
+		{ 0xDD, { "CMP", BIND_OPCODE_FN(OP_CMP), AddressMode::ABSX, 4, true } },
+		{ 0xD9, { "CMP", BIND_OPCODE_FN(OP_CMP), AddressMode::ABSY, 4, true } },
+		{ 0xC1, { "CMP", BIND_OPCODE_FN(OP_CMP), AddressMode::INDX, 6, false } },
+		{ 0xD1, { "CMP", BIND_OPCODE_FN(OP_CMP), AddressMode::INDY, 5, true} },
+
+		{ 0xE0, { "CPX", BIND_OPCODE_FN(OP_CPX), AddressMode::IMM, 2, false } },
+		{ 0xE4, { "CPX", BIND_OPCODE_FN(OP_CPX), AddressMode::ZP, 3, false } },
+		{ 0xEC, { "CPX", BIND_OPCODE_FN(OP_CPX), AddressMode::ABS, 4, false } },
+
+		{ 0xC0, { "CPY", BIND_OPCODE_FN(OP_CPY), AddressMode::IMM, 2, false } },
+		{ 0xC4, { "CPY", BIND_OPCODE_FN(OP_CPY), AddressMode::ZP, 3, false } },
+		{ 0xCC, { "CPY", BIND_OPCODE_FN(OP_CPY), AddressMode::ABS, 4, false } },
+
+		{ 0xC6, { "DEC", BIND_OPCODE_FN(OP_DEC), AddressMode::ZP, 5, false } },
+		{ 0xD6, { "DEC", BIND_OPCODE_FN(OP_DEC), AddressMode::ZPX, 6, false } },
+		{ 0xCE, { "DEC", BIND_OPCODE_FN(OP_DEC), AddressMode::ABS, 6, false } },
+		{ 0xDE, { "DEC", BIND_OPCODE_FN(OP_DEC), AddressMode::ABSX, 7, false } },
+
+		{ 0xCA, { "DEX", BIND_OPCODE_FN(OP_DEX), AddressMode::IMP, 2, false } },
+
+		{ 0x88, { "DEY", BIND_OPCODE_FN(OP_DEY), AddressMode::IMP, 2, false } },
+
+		{ 0x49, { "EOR", BIND_OPCODE_FN(OP_EOR), AddressMode::IMM, 2, false } },
+		{ 0x45, { "EOR", BIND_OPCODE_FN(OP_EOR), AddressMode::ZP, 3, false } },
+		{ 0x55, { "EOR", BIND_OPCODE_FN(OP_EOR), AddressMode::ZPX, 4, false } },
+		{ 0x4D, { "EOR", BIND_OPCODE_FN(OP_EOR), AddressMode::ABS, 4, false } },
+		{ 0x5D, { "EOR", BIND_OPCODE_FN(OP_EOR), AddressMode::ABSX, 4, true } },
+		{ 0x59, { "EOR", BIND_OPCODE_FN(OP_EOR), AddressMode::ABSY, 4, true } },
+		{ 0x41, { "EOR", BIND_OPCODE_FN(OP_EOR), AddressMode::INDX, 6, false } },
+		{ 0x51, { "EOR", BIND_OPCODE_FN(OP_EOR), AddressMode::INDY, 5, true } },
+
+		{ 0xE6, { "INC", BIND_OPCODE_FN(OP_INC), AddressMode::ZP, 5, false } },
+		{ 0xF6, { "INC", BIND_OPCODE_FN(OP_INC), AddressMode::ZPX, 6, false } },
+		{ 0xEE, { "INC", BIND_OPCODE_FN(OP_INC), AddressMode::ABS, 6, false } },
+		{ 0xFE, { "INC", BIND_OPCODE_FN(OP_INC), AddressMode::ABSX, 7, false } },
+
+		{ 0xE8, { "INX", BIND_OPCODE_FN(OP_INX), AddressMode::IMP, 2, false } },
+
+		{ 0xC8, { "INY", BIND_OPCODE_FN(OP_INY), AddressMode::IMP, 2, false } },
+
+		{ 0x4C, { "JMP", BIND_OPCODE_FN(OP_JMP), AddressMode::ABS, 3, false } },
+		{ 0x6C, { "JMP", BIND_OPCODE_FN(OP_JMP), AddressMode::IND, 5, false } },
+
+		{ 0x20, { "JSR", BIND_OPCODE_FN(OP_JSR), AddressMode::ABS, 6, false } },
+
+		{ 0xA9, { "LDA", BIND_OPCODE_FN(OP_LDA), AddressMode::IMM, 2, false } },
+		{ 0xA5, { "LDA", BIND_OPCODE_FN(OP_LDA), AddressMode::ZP, 3, false } },
+		{ 0xB5, { "LDA", BIND_OPCODE_FN(OP_LDA), AddressMode::ZPX, 4, false } },
+		{ 0xAD, { "LDA", BIND_OPCODE_FN(OP_LDA), AddressMode::ABS, 4, false } },
+		{ 0xBD, { "LDA", BIND_OPCODE_FN(OP_LDA), AddressMode::ABSX, 4, true } },
+		{ 0xB9, { "LDA", BIND_OPCODE_FN(OP_LDA), AddressMode::ABSY, 4, true } },
+		{ 0xA1, { "LDA", BIND_OPCODE_FN(OP_LDA), AddressMode::INDX, 6, false } },
+		{ 0xB1, { "LDA", BIND_OPCODE_FN(OP_LDA), AddressMode::INDY, 5, true} },
+
+		{ 0xA2, { "LDX", BIND_OPCODE_FN(OP_LDX), AddressMode::IMM, 2, false } },
+		{ 0xA6, { "LDX", BIND_OPCODE_FN(OP_LDX), AddressMode::ZP, 3, false } },
+		{ 0xB6, { "LDX", BIND_OPCODE_FN(OP_LDX), AddressMode::ZPY, 4, false } },
+		{ 0xAE, { "LDX", BIND_OPCODE_FN(OP_LDX), AddressMode::ABS, 4, false } },
+		{ 0xBE, { "LDX", BIND_OPCODE_FN(OP_LDX), AddressMode::ABSY, 4, true} },
+
+		{ 0xA0, { "LDY", BIND_OPCODE_FN(OP_LDY), AddressMode::IMM, 2, false } },
+		{ 0xA4, { "LDY", BIND_OPCODE_FN(OP_LDY), AddressMode::ZP, 3, false } },
+		{ 0xB4, { "LDY", BIND_OPCODE_FN(OP_LDY), AddressMode::ZPX, 4, false } },
+		{ 0xAC, { "LDY", BIND_OPCODE_FN(OP_LDY), AddressMode::ABS, 4, false } },
+		{ 0xBC, { "LDY", BIND_OPCODE_FN(OP_LDY), AddressMode::ABSX, 4, true} },
+
+		{ 0x4A, { "LSR", BIND_OPCODE_FN(OP_LSR), AddressMode::ACC, 2, false } },
+		{ 0x46, { "LSR", BIND_OPCODE_FN(OP_LSR), AddressMode::ZP, 5, false } },
+		{ 0x56, { "LSR", BIND_OPCODE_FN(OP_LSR), AddressMode::ZPX, 6, false } },
+		{ 0x4E, { "LSR", BIND_OPCODE_FN(OP_LSR), AddressMode::ABS, 6, false } },
+		{ 0x5E, { "LSR", BIND_OPCODE_FN(OP_LSR), AddressMode::ABSX, 7, false } },
+
+		{ 0xEA, { "NOP", BIND_OPCODE_FN(OP_NOP), AddressMode::IMP, 2, false } },
+
+		{ 0x09, { "ORA", BIND_OPCODE_FN(OP_ORA), AddressMode::IMM, 2, false } },
+		{ 0x05, { "ORA", BIND_OPCODE_FN(OP_ORA), AddressMode::ZP, 3, false } },
+		{ 0x15, { "ORA", BIND_OPCODE_FN(OP_ORA), AddressMode::ZPX, 4, false } },
+		{ 0x0D, { "ORA", BIND_OPCODE_FN(OP_ORA), AddressMode::ABS, 4, false } },
+		{ 0x1D, { "ORA", BIND_OPCODE_FN(OP_ORA), AddressMode::ABSX, 4, true } },
+		{ 0x19, { "ORA", BIND_OPCODE_FN(OP_ORA), AddressMode::ABSY, 4, true } },
+		{ 0x01, { "ORA", BIND_OPCODE_FN(OP_ORA), AddressMode::INDX, 6, false } },
+		{ 0x11, { "ORA", BIND_OPCODE_FN(OP_ORA), AddressMode::INDY, 5, true} },
+
+		{ 0x48, { "PHA", BIND_OPCODE_FN(OP_PHA), AddressMode::IMP, 3, false } },
+
+		{ 0x08, { "PHP", BIND_OPCODE_FN(OP_PHP), AddressMode::IMP, 3, false } },
+
+		{ 0x68, { "PLA", BIND_OPCODE_FN(OP_PLA), AddressMode::IMP, 4, false } },
+
+		{ 0x28, { "PLP", BIND_OPCODE_FN(OP_PLP), AddressMode::IMP, 4, false } },
+
+		{ 0x2A, { "ROL", BIND_OPCODE_FN(OP_ROL), AddressMode::ACC, 2, false } },
+		{ 0x26, { "ROL", BIND_OPCODE_FN(OP_ROL), AddressMode::ZP, 5, false } },
+		{ 0x36, { "ROL", BIND_OPCODE_FN(OP_ROL), AddressMode::ZPX, 6, false } },
+		{ 0x2E, { "ROL", BIND_OPCODE_FN(OP_ROL), AddressMode::ABS, 6, false } },
+		{ 0x3E, { "ROL", BIND_OPCODE_FN(OP_ROL), AddressMode::ABSX, 7, false } },
+
+		{ 0x6A, { "ROR", BIND_OPCODE_FN(OP_ROR), AddressMode::ACC, 2, false } },
+		{ 0x66, { "ROR", BIND_OPCODE_FN(OP_ROR), AddressMode::ZP, 5, false } },
+		{ 0x76, { "ROR", BIND_OPCODE_FN(OP_ROR), AddressMode::ZPX, 6, false } },
+		{ 0x6E, { "ROR", BIND_OPCODE_FN(OP_ROR), AddressMode::ABS, 6, false } },
+		{ 0x7E, { "ROR", BIND_OPCODE_FN(OP_ROR), AddressMode::ABSX, 7, false } },
+
+		{ 0x40, { "RTI", BIND_OPCODE_FN(OP_RTI), AddressMode::IMP, 6, false } },
+
+		{ 0x60, { "RTS", BIND_OPCODE_FN(OP_RTS), AddressMode::IMP, 6, false } },
+
+		{ 0xE9, { "SBC", BIND_OPCODE_FN(OP_SBC), AddressMode::IMM, 2, false } },
+		{ 0xE5, { "SBC", BIND_OPCODE_FN(OP_SBC), AddressMode::ZP, 3, false } },
+		{ 0xF5, { "SBC", BIND_OPCODE_FN(OP_SBC), AddressMode::ZPX, 4, false } },
+		{ 0xED, { "SBC", BIND_OPCODE_FN(OP_SBC), AddressMode::ABS, 4, false } },
+		{ 0xFD, { "SBC", BIND_OPCODE_FN(OP_SBC), AddressMode::ABSX, 4, true } },
+		{ 0xF9, { "SBC", BIND_OPCODE_FN(OP_SBC), AddressMode::ABSY, 4, true } },
+		{ 0xE1, { "SBC", BIND_OPCODE_FN(OP_SBC), AddressMode::INDX, 6, false } },
+		{ 0xF1, { "SBC", BIND_OPCODE_FN(OP_SBC), AddressMode::INDY, 5, true} },
+
+		{ 0x38, { "SEC", BIND_OPCODE_FN(OP_SEC), AddressMode::IMP, 2, false } },
+
+		{ 0xF8, { "SED", BIND_OPCODE_FN(OP_SED), AddressMode::IMP, 2, false } },
+
+		{ 0x78, { "SEI", BIND_OPCODE_FN(OP_SEI), AddressMode::IMP, 2, false } },
+
+		{ 0x85, { "STA", BIND_OPCODE_FN(OP_STA), AddressMode::ZP, 3, false } },
+		{ 0x95, { "STA", BIND_OPCODE_FN(OP_STA), AddressMode::ZPX, 4, false } },
+		{ 0x8D, { "STA", BIND_OPCODE_FN(OP_STA), AddressMode::ABS, 4, false } },
+		{ 0x9D, { "STA", BIND_OPCODE_FN(OP_STA), AddressMode::ABSX, 5, false } },
+		{ 0x99, { "STA", BIND_OPCODE_FN(OP_STA), AddressMode::ABSY, 5, false } },
+		{ 0x81, { "STA", BIND_OPCODE_FN(OP_STA), AddressMode::INDX, 6, false } },
+		{ 0x91, { "STA", BIND_OPCODE_FN(OP_STA), AddressMode::INDY, 6, false } },
+
+		{ 0x86, { "STX", BIND_OPCODE_FN(OP_STX), AddressMode::ZP, 3, false } },
+		{ 0x96, { "STX", BIND_OPCODE_FN(OP_STX), AddressMode::ZPY, 4, false } },
+		{ 0x8E, { "STX", BIND_OPCODE_FN(OP_STX), AddressMode::ABS, 4, false } },
+
+		{ 0x84, { "STY", BIND_OPCODE_FN(OP_STY), AddressMode::ZP, 3, false } },
+		{ 0x94, { "STY", BIND_OPCODE_FN(OP_STY), AddressMode::ZPX, 4, false } },
+		{ 0x8C, { "STY", BIND_OPCODE_FN(OP_STY), AddressMode::ABS, 4, false } },
+
+		{ 0xAA, { "TAX", BIND_OPCODE_FN(OP_TAX), AddressMode::IMP, 2, false } },
+
+		{ 0xA8, { "TAY", BIND_OPCODE_FN(OP_TAY), AddressMode::IMP, 2, false } },
+
+		{ 0xB8, { "TSX", BIND_OPCODE_FN(OP_TSX), AddressMode::IMP, 2, false } },
+
+		{ 0x8A, { "TXA", BIND_OPCODE_FN(OP_TXA), AddressMode::IMP, 2, false } },
+
+		{ 0x9A, { "TXS", BIND_OPCODE_FN(OP_TXS), AddressMode::IMP, 2, false } },
+
+		{ 0x98, { "TYA", BIND_OPCODE_FN(OP_TYA), AddressMode::IMP, 2, false } },
+	};
 }
 
 CPU::~CPU()
@@ -10,7 +218,7 @@ CPU::~CPU()
 
 void CPU::Write(uint16_t address, uint8_t* data, unsigned int size)
 {
-	for (int i = 0; i < size; i++)
+	for (unsigned int i = 0; i < size; i++)
 		m_RAM[address + i] = *(data + i);
 }
 
@@ -34,6 +242,7 @@ void CPU::Cycle()
 		// Decode
 		m_CurrentInstruction = &m_Instructions[opcode];
 		// Execute
+		m_Cycles += m_CurrentInstruction->Cycles;
 		m_CurrentInstruction->Func();
 	}
 }
@@ -42,9 +251,78 @@ uint8_t& CPU::FetchByte()
 {
 	switch (m_CurrentInstruction->AddressMode)
 	{
-		// No Memory Needed
+		case AddressMode::ACC:
+		{
+			return m_A;
+		}
+		// Returns signed byte that needs to be cast
+		case AddressMode::REL:
+		// Value Passed in Memory
 		case AddressMode::IMM:
+		{
+			return m_RAM[m_PC++];
+		}
 		// Memory comes from 0x00 - 0xFF
+		case AddressMode::ZP:
+		{
+			return m_RAM[FetchAddress()];
+		}
+		// Memory comes from 0x00 - 0xFF with X offset
+		case AddressMode::ZPX:
+		{
+			return m_RAM[FetchAddress()];
+		}
+		// Memory comes from 0x00 - 0xFF with Y offset
+		case AddressMode::ZPY:
+		{
+			return m_RAM[FetchAddress()];
+		}
+		// Returns the absolute address
+		case AddressMode::ABS:
+		{
+			return m_RAM[FetchAddress()];
+		}
+		// Returns the absolute address with X offset
+		case AddressMode::ABSX:
+		{
+			return m_RAM[FetchAddress()];
+		}
+		// Returns the absolute address with Y offset
+		case AddressMode::ABSY:
+		{
+			return m_RAM[FetchAddress()];
+		}
+		// Pointer to actual address
+		case AddressMode::IND:
+		{
+			return m_RAM[FetchAddress()];
+		}
+		// Pointer to actual address with X Offset
+		// Points to 0x00 to 0xFF (Page Zero)
+		case AddressMode::INDX: 
+		{
+			return m_RAM[FetchAddress()];
+		}
+		// Pointer to actual address with Y Offset
+		// Probably Wrong. Very confused
+		case AddressMode::INDY:
+		{
+			return m_RAM[FetchAddress()];
+		}
+		default:
+		{
+			std::cout << "Addressing Mode is Not Implemented for FetchByte" << std::endl;
+			return m_RAM[0x00];
+		}
+	}
+}
+
+// Absolute only return 16 bit. rest return 8 bit
+uint16_t CPU::FetchAddress()
+{
+	switch (m_CurrentInstruction->AddressMode)
+	{
+		// 8 Bit Address 0x00 to 0xFF
 		case AddressMode::ZP:
 		{
 			return m_RAM[m_PC++];
@@ -52,19 +330,19 @@ uint8_t& CPU::FetchByte()
 		// Memory comes from 0x00 - 0xFF with X offset
 		case AddressMode::ZPX:
 		{
-			uint16_t address = m_RAM[m_PC++] + m_X;
-			return m_RAM[address];
+			uint8_t address = m_RAM[m_PC++] + m_X;
+			return address;
 		}
 		// Memory comes from 0x00 - 0xFF with Y offset
 		case AddressMode::ZPY:
 		{
-			uint16_t address = m_RAM[m_PC++] + m_Y;
-			return m_RAM[address];
+			uint8_t address = m_RAM[m_PC++] + m_Y;
+			return address;
 		}
 		// Returns the absolute address
 		case AddressMode::ABS:
 		{
-			return m_RAM[GetAddress(m_PC)];
+			return GetAddress(m_PC);
 		}
 		// Returns the absolute address with X offset
 		case AddressMode::ABSX:
@@ -75,11 +353,11 @@ uint8_t& CPU::FetchByte()
 			// If page boundary was crossed by adding X
 			if ((addrAbs & 0xFF) != (addrRel & 0xFF))
 			{
-				if (m_CurrentInstruction->CanIncreaseCycles)
+				if (m_CurrentInstruction->CanAddAdditionalCycles)
 					m_Cycles++;
 			}
 
-			return m_RAM[addrAbs];
+			return addrAbs;
 		}
 		// Returns the absolute address with Y offset
 		case AddressMode::ABSY:
@@ -90,50 +368,51 @@ uint8_t& CPU::FetchByte()
 			// If page boundary was crossed by adding Y
 			if ((addrAbs & 0xFF) != (addrRel & 0xFF))
 			{
-				if (m_CurrentInstruction->CanIncreaseCycles)
+				if (m_CurrentInstruction->CanAddAdditionalCycles)
 					m_Cycles++;
 			}
 
-			return m_RAM[addrAbs];
+			return addrAbs;
 		}
 		// Pointer to actual address
 		case AddressMode::IND:
 		{
 			uint16_t ptr = GetAddress(m_PC);
-			return m_RAM[GetAddress(ptr)];
+			return GetAddress(ptr);
 		}
 		// Pointer to actual address with X Offset
 		// Points to 0x00 to 0xFF (Page Zero)
-		case AddressMode::INDX: 
+		case AddressMode::INDX:
 		{
 			uint16_t ptr = m_RAM[m_PC++] + m_X;
 
 			// Wrapping if adding X goes beyond Zero Page
 			if (ptr > 0xFF)
-			{
 				ptr = ptr - 0xFF;
 
-				if (m_CurrentInstruction->CanIncreaseCycles)
-					m_Cycles++;
-			}
-
-			return m_RAM[GetAddress(ptr)];
+			uint8_t address = GetAddress(ptr);
+			return address;
 		}
 		// Pointer to actual address with Y Offset
 		// Probably Wrong. Very confused
 		case AddressMode::INDY:
 		{
 			uint16_t ptr = m_RAM[m_PC++] + m_Y;
-			return m_RAM[GetAddress(ptr)];
+
+			// ptr goes past Zero Page
+			if (ptr > 0xFF)
+			{
+				if (m_CurrentInstruction->CanAddAdditionalCycles)
+					m_Cycles++;
+			}
+
+			uint8_t address = GetAddress(ptr);
+			return address;
 		}
-		case AddressMode::ACC:
+		default:
 		{
-			return m_A;
-		}
-		// Returns signed byte that is added to Program Counter Depending on the Condition
-		case AddressMode::REL:
-		{
-			return m_RAM[m_PC++];
+			std::cout << "Addressing Mode is Not Implemented for FetchAddress" << std::endl;
+			return 0;
 		}
 	}
 }
@@ -153,7 +432,7 @@ void CPU::PushToStack(uint8_t value)
 	m_RAM[m_SP++] = value;
 }
 
-void CPU::PushToStack(uint16_t value)
+void CPU::PushToStackAddress(uint16_t value)
 {
 	uint8_t lo = value;
 	uint8_t hi = (value >> 4);
@@ -177,12 +456,12 @@ uint16_t CPU::PopFromStackAddress()
 
 #pragma endregion
 
-#pragma region Instructions
+#pragma region Op Codes
 
 void CPU::OP_ADC()
 {
-	uint16_t byte = FetchByte();
-	uint16_t result = m_A + byte + m_F.C;
+	uint8_t byte = FetchByte();
+	uint8_t result = m_A + byte + m_F.C;
 
 	m_F.C = result > 255;
 	m_F.Z = result == 0;
@@ -227,7 +506,7 @@ void CPU::OP_BEQ()
 
 void CPU::OP_BIT()
 {
-	uint16_t byte = FetchByte();
+	uint8_t byte = FetchByte();
 	
 	m_F.Z = (m_A & byte) == 0;
 	m_F.V = (byte & 0x40);
@@ -307,8 +586,240 @@ void CPU::OP_CPY()
 
 void CPU::OP_DEC()
 {
-	uint8_t byte = FetchByte();
+	uint8_t& byte = FetchByte();
 	Helper_Decrement(byte);
+}
+
+void CPU::OP_DEX()
+{
+	Helper_Decrement(m_X);
+}
+
+void CPU::OP_DEY()
+{
+	Helper_Decrement(m_Y);
+}
+
+void CPU::OP_EOR()
+{
+	uint8_t byte = FetchByte();
+	m_A ^= byte;
+
+	m_F.Z = m_A == 0;
+	m_F.N = m_A & 0x80;
+}
+
+void CPU::OP_INC()
+{
+	uint8_t& byte = FetchByte();
+	Helper_Increment(byte);
+}
+
+void CPU::OP_INX()
+{
+	Helper_Increment(m_X);
+}
+
+void CPU::OP_INY()
+{
+	Helper_Increment(m_Y);
+}
+
+void CPU::OP_JMP()
+{
+	m_PC = FetchAddress();
+}
+
+void CPU::OP_JSR()
+{
+	PushToStackAddress(m_PC - 1);
+	m_PC = FetchAddress();
+}
+
+void CPU::OP_LDA()
+{
+	Helper_Load(m_A);
+}
+
+void CPU::OP_LDX()
+{
+	Helper_Load(m_X);
+}
+
+void CPU::OP_LDY()
+{
+	Helper_Load(m_Y);
+}
+
+void CPU::OP_LSR()
+{
+	uint8_t& byte = FetchByte();
+
+	m_F.C = byte & 0x01;
+	byte >>= 1;
+
+	m_F.Z = byte == 0;
+	m_F.N = byte & 0x80;
+}
+
+void CPU::OP_NOP()
+{
+	m_PC++;
+}
+
+void CPU::OP_ORA()
+{
+	m_A |= FetchByte();
+
+	m_F.Z = m_A == 0;
+	m_F.N = m_A & 0x80;
+}
+
+void CPU::OP_PHA()
+{
+	PushToStack(m_A);
+}
+
+void CPU::OP_PHP()
+{
+	PushToStack(m_F.Hex);
+}
+
+void CPU::OP_PLA()
+{
+	m_A = PopFromStack();
+
+	m_F.Z = m_A == 0;
+	m_F.N = m_A & 0x80;
+}
+
+void CPU::OP_PLP()
+{
+	m_F.Hex = PopFromStack();
+}
+
+void CPU::OP_ROL()
+{
+	uint8_t& byte = FetchByte();
+
+	m_F.C = byte & 0x80;
+
+	byte <<= 1;
+	byte |= m_F.C;
+
+	m_F.Z = m_A == 0;
+	m_F.N = byte & 0x80;
+}
+
+void CPU::OP_ROR()
+{
+	uint8_t& byte = FetchByte();
+
+	m_F.C = byte & 0x01;
+
+	byte >>= 1;
+	byte |= (m_F.C << 7);
+
+	m_F.Z = m_A == 0;
+	m_F.N = byte & 0x80;
+}
+
+void CPU::OP_RTI()
+{
+	m_F.Hex = PopFromStack();
+	m_PC = PopFromStack();
+}
+
+void CPU::OP_RTS()
+{
+	m_PC = PopFromStack();
+}
+
+void CPU::OP_SBC()
+{
+	uint8_t byte = FetchByte();
+	uint8_t result = m_A - byte - (1 - m_F.C);
+
+	// If Overflow
+	if ((result & 0x80) != (m_A & 0x80))
+	{
+		m_F.C = 0;
+		m_F.V = 1;
+	}
+
+	m_F.Z = result == 0;
+	m_F.N = result & 0x80;
+
+	m_A = result;
+}
+
+void CPU::OP_SEC()
+{
+	m_F.C = 1;
+}
+
+void CPU::OP_SED()
+{
+	m_F.D = 1;
+}
+
+void CPU::OP_SEI()
+{
+	m_F.I = 1;
+}
+
+void CPU::OP_STA()
+{
+	FetchByte() = m_A;
+}
+
+void CPU::OP_STX()
+{
+	FetchByte() = m_X;
+}
+
+void CPU::OP_STY()
+{
+	FetchByte() = m_Y;
+}
+
+void CPU::OP_TAX()
+{
+	Helper_TransferAccumulator(m_X);
+}
+
+void CPU::OP_TAY()
+{
+	Helper_TransferAccumulator(m_Y);
+}
+
+void CPU::OP_TSX()
+{
+	m_X = m_SP;
+
+	m_F.Z = m_X == 0;
+	m_F.N = m_X & 0x80;
+}
+
+void CPU::OP_TXA()
+{
+	m_A = m_X;
+
+	m_F.Z = m_A == 0;
+	m_F.N = m_A & 0x80;
+}
+
+void CPU::OP_TXS()
+{
+	m_SP = m_X;
+}
+
+void CPU::OP_TYA()
+{
+	m_A = m_Y;
+
+	m_F.Z = m_A == 0;
+	m_F.N = m_A & 0x80;
 }
 
 void CPU::Helper_BranchIf(bool condition)
@@ -343,6 +854,30 @@ void CPU::Helper_Compare(uint8_t value)
 void CPU::Helper_Decrement(uint8_t& value)
 {
 	value--;
+
+	m_F.Z = value == 0;
+	m_F.N = value & 0x80;
+}
+
+void CPU::Helper_Increment(uint8_t& value)
+{
+	value++;
+
+	m_F.Z = value == 0;
+	m_F.N = value & 0x80;
+}
+
+void CPU::Helper_Load(uint8_t& value)
+{
+	value = FetchByte();
+
+	m_F.Z = value == 0;
+	m_F.N = value & 0x80;
+}
+
+void CPU::Helper_TransferAccumulator(uint8_t& value)
+{
+	value = m_A;
 
 	m_F.Z = value == 0;
 	m_F.N = value & 0x80;
