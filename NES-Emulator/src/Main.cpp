@@ -1,7 +1,10 @@
-#include "Core/CPU.h"
+#include "Emulator/Emulator.h"
 
 int main()
 {
-	CPU cpu;
-	cpu.Reset();
+	Emulator* app = new Emulator;
+	app->Run();
+	delete app;
+
+	while (1);
 }

@@ -5,12 +5,22 @@
 #include <functional>
 #include <string>
 
+#include "Bus.h"
+
 const unsigned int MEMORY_SIZE = 2048;
+
+const unsigned int MEMORY_START_ADDRESS = 0x0000;
+const unsigned int MEMORY_END_ADDRESS = MEMORY_START_ADDRESS + MEMORY_SIZE;
+const unsigned int MEMORY_MIRROR_END_ADDRESS = 0x1FFFF;
 
 // Stack is 256 to 511 (0x0100 - 0x01FF)
 const unsigned int STACK_START_ADDRESS = 0x0100;
+
 const unsigned int PC_START_ADDRESS = 0xFFFC;
-const unsigned int IRQ_INTERRUPT_ADDRESS = 0xFFFE;
+
+const uint16_t NMI_INTERRUPT_ADDRESS = 0xFFFA;
+const uint16_t RESET_INTERRUPT_ADDRESS = 0xFFFC;
+const uint16_t IRQ_INTERRUPT_ADDRESS = 0xFFFE;
 
 #define BIND_OPCODE_FN(x) std::bind(&CPU::x, this)
 
@@ -19,25 +29,30 @@ class CPU
 private:
 	using OpCodeFn = std::function<void()>;
 public:
-	CPU();
+	CPU(Bus* bus);
 	~CPU();
 
-	// Get 8-bit Byte
-	inline uint8_t& Read(uint16_t& address) { return m_RAM[address++]; }
-	inline void Write(uint16_t address, uint8_t data) { m_RAM[address] = data; }
+	// Always check if it is null
+	uint8_t* Read(uint16_t address);
+	void Write(uint16_t address, uint8_t data);
 	void Write(uint16_t address, uint8_t* data, unsigned int size);
 
 	void Reset();
-	void Cycle();
+	void NMI();
+	void IRQ();
+
+	bool Cycle();
 private:
-	// Fetches the byte needed for certain instructions
-	uint8_t& FetchByte();
 	// Fetches the address needed for certain instructions
 	uint16_t FetchAddress();
+	// Fetches the byte needed for certain instructions
+	uint8_t& FetchByte();
 
 	uint16_t GetAddress(uint16_t& ptr);
+	uint16_t GetMirrorAddress(uint16_t address) const;
 
-	// Decided to implement stack by hand for "F U N"
+	bool CheckInterruptFlags();
+
 	#pragma region Stack
 
 	void PushToStack(uint8_t value);
@@ -116,8 +131,8 @@ private:
 	void Helper_TransferAccumulator(uint8_t& value);
 
 	#pragma endregion
-
 private:
+	// Registers:
 	// Acuumlator, X-Index, Y-Index, Stack Pointer
 	uint8_t m_A, m_X, m_Y, m_SP;
 	uint16_t m_PC;
@@ -138,10 +153,15 @@ private:
 
 		uint8_t Hex;
 	};
-
 	Flags m_F;
 
-	uint8_t m_RAM[MEMORY_SIZE];
+	struct InterruptFlags
+	{
+		uint8_t RESET : 1;
+		uint8_t NMI : 1;
+		uint8_t IRQ : 1;
+	};
+	InterruptFlags m_IF;
 
 	unsigned int m_Cycles = 0;
 
@@ -153,7 +173,6 @@ private:
 		IND, INDX, INDY,
 		ACC, REL
 	};
-
 	struct Instruction
 	{
 		std::string Name;
@@ -164,6 +183,9 @@ private:
 	};
 
 	// 1 Byte is taken up instruction number, Instruction specifies the remaining bytes needed
+	// 2 Byte is taken up for interrupts
 	std::map<uint8_t, Instruction> m_Instructions;
 	Instruction* m_CurrentInstruction;
+
+	Bus* m_Bus = nullptr;
 };
