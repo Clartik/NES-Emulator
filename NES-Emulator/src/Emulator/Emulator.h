@@ -1,8 +1,6 @@
 #pragma once
 
-#include "NES/CPU.h"
-#include "NES/Bus.h"
-#include "NES/RAM.h"
+#include "NES/NES.h"
 
 class Emulator
 {
@@ -14,7 +12,5 @@ public:
 private:
 	bool m_Running = true;
 
-	CPU* m_CPU;
-	Bus m_Bus;
-	RAM m_RAM;
+	NES* m_NES;
 };

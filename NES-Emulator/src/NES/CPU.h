@@ -10,11 +10,16 @@
 const unsigned int MEMORY_SIZE = 2048;
 
 const unsigned int MEMORY_START_ADDRESS = 0x0000;
-const unsigned int MEMORY_END_ADDRESS = MEMORY_START_ADDRESS + MEMORY_SIZE;
+const unsigned int MEMORY_END_ADDRESS = 0x07FF;
 const unsigned int MEMORY_MIRROR_END_ADDRESS = 0x1FFFF;
 
 // Stack is 256 to 511 (0x0100 - 0x01FF)
 const unsigned int STACK_START_ADDRESS = 0x0100;
+const unsigned int STACK_END_ADDRESS = 0x01FF;
+
+const uint16_t PPU_REGISTERS_START_ADDRESS = 0x2000;
+const uint16_t PPU_REGISTERS_END_ADDRESS = 0x2007;
+const uint16_t PPU_REGISTERS_MIRROR_END_ADDRESS = 0x3FFF;
 
 const unsigned int PC_START_ADDRESS = 0xFFFC;
 

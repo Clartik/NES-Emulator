@@ -258,6 +258,10 @@ bool CPU::Cycle()
 {
 	if (m_Cycles > 0)
 		m_Cycles--;
+	
+	// IRQ + 1 because addresses are two bytes long
+	if (m_PC >= NMI_INTERRUPT_ADDRESS && m_PC <= IRQ_INTERRUPT_ADDRESS + 1)
+		m_PC = GetAddress(m_PC);
 
 	uint8_t opcode = *Read(m_PC++);
 
@@ -267,7 +271,6 @@ bool CPU::Cycle()
 		std::cout << "Could not find instruction for 0x" << std::hex << opcode << std::endl;
 		return false;
 	}
-
 
 	m_CurrentInstruction = &m_Instructions[opcode];
 
@@ -286,97 +289,97 @@ uint16_t CPU::FetchAddress()
 	switch (m_CurrentInstruction->AddressMode)
 	{
 		// 8 Bit Address 0x00 to 0xFF
-	case AddressMode::ZP:
-	{
-		return *Read(m_PC++);
-	}
-	// Memory comes from 0x00 - 0xFF with X offset
-	case AddressMode::ZPX:
-	{
-		uint8_t address = *Read(m_PC++) + m_X;
-		return address;
-	}
-	// Memory comes from 0x00 - 0xFF with Y offset
-	case AddressMode::ZPY:
-	{
-		uint8_t address = *Read(m_PC++) + m_Y;
-		return address;
-	}
-	// Returns the absolute address
-	case AddressMode::ABS:
-	{
-		return GetAddress(m_PC);
-	}
-	// Returns the absolute address with X offset
-	case AddressMode::ABSX:
-	{
-		uint16_t addrRel = GetAddress(m_PC);
-		uint16_t addrAbs = addrRel + m_X;
-
-		// If page boundary was crossed by adding X
-		if ((addrAbs & 0xFF) != (addrRel & 0xFF))
+		case AddressMode::ZP:
 		{
-			if (m_CurrentInstruction->CanAddAdditionalCycles)
-				m_Cycles++;
+			return *Read(m_PC++);
 		}
-
-		return addrAbs;
-	}
-	// Returns the absolute address with Y offset
-	case AddressMode::ABSY:
-	{
-		uint16_t addrRel = GetAddress(m_PC);
-		uint16_t addrAbs = addrRel + m_Y;
-
-		// If page boundary was crossed by adding Y
-		if ((addrAbs & 0xFF) != (addrRel & 0xFF))
+		// Memory comes from 0x00 - 0xFF with X offset
+		case AddressMode::ZPX:
 		{
-			if (m_CurrentInstruction->CanAddAdditionalCycles)
-				m_Cycles++;
+			uint8_t address = *Read(m_PC++) + m_X;
+			return address;
 		}
-
-		return addrAbs;
-	}
-	// Pointer to actual address
-	case AddressMode::IND:
-	{
-		uint16_t ptr = GetAddress(m_PC);
-		return GetAddress(ptr);
-	}
-	// Pointer to actual address with X Offset
-	// Points to 0x00 to 0xFF (Page Zero)
-	case AddressMode::INDX:
-	{
-		uint16_t ptr = *Read(m_PC++) + m_X;
-
-		// Wrapping if adding X goes beyond Zero Page
-		if (ptr > 0xFF)
-			ptr = ptr - 0xFF;
-
-		uint8_t address = GetAddress(ptr);
-		return address;
-	}
-	// Pointer to actual address with Y Offset
-	// Probably Wrong. Very confused
-	case AddressMode::INDY:
-	{
-		uint16_t ptr = *Read(m_PC++) + m_Y;
-
-		// ptr goes past Zero Page
-		if (ptr > 0xFF)
+		// Memory comes from 0x00 - 0xFF with Y offset
+		case AddressMode::ZPY:
 		{
-			if (m_CurrentInstruction->CanAddAdditionalCycles)
-				m_Cycles++;
+			uint8_t address = *Read(m_PC++) + m_Y;
+			return address;
 		}
+		// Returns the absolute address
+		case AddressMode::ABS:
+		{
+			return GetAddress(m_PC);
+		}
+		// Returns the absolute address with X offset
+		case AddressMode::ABSX:
+		{
+			uint16_t addrRel = GetAddress(m_PC);
+			uint16_t addrAbs = addrRel + m_X;
 
-		uint8_t address = GetAddress(ptr);
-		return address;
-	}
-	default:
-	{
-		std::cout << "Addressing Mode is Not Implemented for FetchAddress" << std::endl;
-		return 0;
-	}
+			// If page boundary was crossed by adding X
+			if ((addrAbs & 0xFF) != (addrRel & 0xFF))
+			{
+				if (m_CurrentInstruction->CanAddAdditionalCycles)
+					m_Cycles++;
+			}
+
+			return addrAbs;
+		}
+		// Returns the absolute address with Y offset
+		case AddressMode::ABSY:
+		{
+			uint16_t addrRel = GetAddress(m_PC);
+			uint16_t addrAbs = addrRel + m_Y;
+
+			// If page boundary was crossed by adding Y
+			if ((addrAbs & 0xFF) != (addrRel & 0xFF))
+			{
+				if (m_CurrentInstruction->CanAddAdditionalCycles)
+					m_Cycles++;
+			}
+
+			return addrAbs;
+		}
+		// Pointer to actual address
+		case AddressMode::IND:
+		{
+			uint16_t ptr = GetAddress(m_PC);
+			return GetAddress(ptr);
+		}
+		// Pointer to actual address with X Offset
+		// Points to 0x00 to 0xFF (Page Zero)
+		case AddressMode::INDX:
+		{
+			uint16_t ptr = *Read(m_PC++) + m_X;
+
+			// Wrapping if adding X goes beyond Zero Page
+			if (ptr > 0xFF)
+				ptr = ptr - 0xFF;
+
+			uint8_t address = GetAddress(ptr);
+			return address;
+		}
+		// Pointer to actual address with Y Offset
+		// Probably Wrong. Very confused
+		case AddressMode::INDY:
+		{
+			uint16_t ptr = *Read(m_PC++) + m_Y;
+
+			// ptr goes past Zero Page
+			if (ptr > 0xFF)
+			{
+				if (m_CurrentInstruction->CanAddAdditionalCycles)
+					m_Cycles++;
+			}
+
+			uint8_t address = GetAddress(ptr);
+			return address;
+		}
+		default:
+		{
+			std::cout << "Addressing Mode is Not Implemented for FetchAddress" << std::endl;
+			return 0;
+		}
 	}
 }
 
@@ -464,6 +467,10 @@ uint16_t CPU::GetMirrorAddress(uint16_t address) const
 	if (address >= MEMORY_START_ADDRESS && address <= MEMORY_MIRROR_END_ADDRESS)
 		return address & MEMORY_END_ADDRESS;
 
+	// PPU Registers
+	if (address >= PPU_REGISTERS_START_ADDRESS && address <= PPU_REGISTERS_MIRROR_END_ADDRESS)
+		return address & PPU_REGISTERS_END_ADDRESS;
+
 	// OTHER
 
 	return address;
@@ -496,6 +503,12 @@ bool CPU::CheckInterruptFlags()
 
 void CPU::PushToStack(uint8_t value)
 {
+	if (m_SP + 1 > STACK_END_ADDRESS)
+	{
+		std::cout << "Stack Limited Reached!" << std::endl;
+		return;
+	}
+
 	Write(m_SP++, value);
 }
 
@@ -504,8 +517,8 @@ void CPU::PushToStackAddress(uint16_t value)
 	uint8_t lo = value;
 	uint8_t hi = (value >> 4);
 
-	Write(m_SP++, lo);
-	Write(m_SP++, hi);
+	PushToStack(lo);
+	PushToStack(hi);
 }
 
 uint8_t CPU::PopFromStack()
