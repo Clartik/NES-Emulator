@@ -8,6 +8,8 @@ Bus::Bus()
 
 Bus::~Bus()
 {
+	for (auto* i : m_Peripherals)
+		delete i;
 }
 
 uint8_t* Bus::Read(uint16_t address)
@@ -17,6 +19,7 @@ uint8_t* Bus::Read(uint16_t address)
 	if (!peripheral)
 		return nullptr;
 
+	address -= peripheral->GetStartAddress();
 	return &peripheral->Read(address);
 }
 
@@ -27,17 +30,8 @@ void Bus::Write(uint16_t address, uint8_t value)
 	if (!peripheral)
 		return;
 
+	address -= peripheral->GetStartAddress();
 	peripheral->Write(address, value);
-}
-
-void Bus::Write(uint16_t address, uint8_t* value, unsigned int size)
-{
-	Peripheral* peripheral = Find(address);
-
-	if (!peripheral)
-		return;
-
-	peripheral->Write(address, value, size);
 }
 
 void Bus::Add(Peripheral* peripheral)

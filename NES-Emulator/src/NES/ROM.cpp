@@ -6,27 +6,21 @@
 ROM::ROM(uint16_t startAddress, uint8_t* data, unsigned int size)
 	: Peripheral(startAddress, startAddress + 0xBFDF)
 {
-	m_ROM = new uint8_t[0xBFDF];
-	memcpy(m_ROM, data, sizeof(uint8_t) * size);
+	m_PRG = new uint8_t[0xBFDF];
+	memcpy(m_PRG, data, sizeof(uint8_t) * size);
 }
 
 ROM::~ROM()
 {
-	delete[] m_ROM;
+	delete[] m_PRG;
 }
 
 uint8_t& ROM::Read(uint16_t address)
 {
-	address -= m_StartAddress;
-	return m_ROM[address];
+	return m_PRG[address];
 }
 
 void ROM::Write(uint16_t address, uint8_t data)
-{
-	std::cout << "Writing is not permitted!" << std::endl;
-}
-
-void ROM::Write(uint16_t address, uint8_t* data, unsigned int size)
 {
 	std::cout << "Writing is not permitted!" << std::endl;
 }

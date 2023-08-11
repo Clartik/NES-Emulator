@@ -4,12 +4,21 @@
 #include <thread>
 #include <iostream>
 
-NES::NES()
-	: m_RAM(MEMORY_START_ADDRESS, MEMORY_SIZE)
-{
-	m_Bus.Add(&m_RAM);
+#include "NES/Memory.h"
 
-	m_CPU = new CPU(&m_Bus);
+NES::NES()
+{
+	m_CPU = new CPU;
+	m_PPU = new PPU(PPU_REGISTERS_START_ADDRESS);
+
+	Bus* cpuBus = m_CPU->GetBus();
+	Bus* ppuBus = m_PPU->GetBus();
+
+	cpuBus->Add(new Memory(RAM_START_ADDRESS, RAM_SIZE));
+	cpuBus->Add(m_PPU);
+
+	ppuBus->Add(new Memory(VRAM_START_ADDRESS, VRAM_SIZE));
+
 	m_CPU->Reset();
 }
 
@@ -20,7 +29,13 @@ NES::~NES()
 
 void NES::OnUpdate(double deltaTime)
 {
-	m_CPU->Cycle();
+	std::thread cpuThread(&CPU::Cycle, m_CPU, (CPU_TIME_PER_INSTRUCTION_SEC * MICROSECONDS_CONVERSION) - deltaTime);
 
-	std::this_thread::sleep_for(std::chrono::microseconds((int)(CPU_TIME_PER_INSTRUCTION_SEC * 1000000)));
+	for (int i = 0; i < 3; i++)
+	{
+		std::thread ppuThread(&PPU::Cycle, m_PPU, (PPU_TIME_PER_INSTRUCTION_SEC * MICROSECONDS_CONVERSION) - deltaTime);
+		ppuThread.join();
+	}
+
+	cpuThread.join();
 }

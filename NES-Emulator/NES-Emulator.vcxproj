@@ -164,16 +164,24 @@
     <ClCompile Include="src\NES\CPU.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\NES\NES.cpp" />
-    <ClCompile Include="src\NES\RAM.cpp" />
+    <ClCompile Include="src\NES\PPU\Nametable.cpp" />
+    <ClCompile Include="src\NES\PPU\PPU.cpp" />
+    <ClCompile Include="src\NES\Memory.cpp" />
+    <ClCompile Include="src\NES\PPU\Tile.cpp" />
     <ClCompile Include="src\NES\ROM.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\NES\Base\BusController.h" />
     <ClInclude Include="src\Emulator\Emulator.h" />
     <ClInclude Include="src\NES\Bus.h" />
     <ClInclude Include="src\NES\NES.h" />
-    <ClInclude Include="src\NES\Peripheral.h" />
+    <ClInclude Include="src\NES\Base\Peripheral.h" />
     <ClInclude Include="src\NES\CPU.h" />
-    <ClInclude Include="src\NES\RAM.h" />
+    <ClInclude Include="src\NES\PPU\Nametable.h" />
+    <ClInclude Include="src\NES\PPU\PatternTable.h" />
+    <ClInclude Include="src\NES\PPU\PPU.h" />
+    <ClInclude Include="src\NES\Memory.h" />
+    <ClInclude Include="src\NES\PPU\Tile.h" />
     <ClInclude Include="src\NES\ROM.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

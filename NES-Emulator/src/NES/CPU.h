@@ -5,13 +5,13 @@
 #include <functional>
 #include <string>
 
-#include "Bus.h"
+#include "Base/BusController.h"
 
-const unsigned int MEMORY_SIZE = 2048;
+const unsigned int RAM_SIZE = 2048;
 
-const unsigned int MEMORY_START_ADDRESS = 0x0000;
-const unsigned int MEMORY_END_ADDRESS = 0x07FF;
-const unsigned int MEMORY_MIRROR_END_ADDRESS = 0x1FFFF;
+const unsigned int RAM_START_ADDRESS = 0x0000;
+const unsigned int RAM_END_ADDRESS = 0x07FF;
+const unsigned int RAM_MIRROR_END_ADDRESS = 0x1FFFF;
 
 // Stack is 256 to 511 (0x0100 - 0x01FF)
 const unsigned int STACK_START_ADDRESS = 0x0100;
@@ -29,12 +29,12 @@ const uint16_t IRQ_INTERRUPT_ADDRESS = 0xFFFE;
 
 #define BIND_OPCODE_FN(x) std::bind(&CPU::x, this)
 
-class CPU
+class CPU : public BusController
 {
 private:
 	using OpCodeFn = std::function<void()>;
 public:
-	CPU(Bus* bus);
+	CPU();
 	~CPU();
 
 	// Always check if it is null
@@ -46,7 +46,7 @@ public:
 	void NMI();
 	void IRQ();
 
-	bool Cycle();
+	void Cycle(double waitTime);
 private:
 	// Fetches the address needed for certain instructions
 	uint16_t FetchAddress();
@@ -191,6 +191,4 @@ private:
 	// 2 Byte is taken up for interrupts
 	std::map<uint8_t, Instruction> m_Instructions;
 	Instruction* m_CurrentInstruction;
-
-	Bus* m_Bus = nullptr;
 };

@@ -1,9 +1,11 @@
 #include "CPU.h"
 
 #include <iostream>
+#include <thread>
+#include <chrono>
 
-CPU::CPU(Bus* bus)
-	: m_Bus(bus)
+CPU::CPU()
+	: BusController(new Bus)
 {
 	m_Instructions = {
 		{ 0x69, { "ADC", BIND_OPCODE_FN(OP_ADC), AddressMode::IMM , 2, false } },
@@ -232,7 +234,9 @@ void CPU::Write(uint16_t address, uint8_t data)
 void CPU::Write(uint16_t address, uint8_t* data, unsigned int size)
 {
 	address = GetMirrorAddress(address);
-	m_Bus->Write(address, data, size);
+
+	for (int i = 0; i < size; i++)
+		m_Bus->Write(address + i, *(data + i));
 }
 
 void CPU::Reset()
@@ -243,7 +247,7 @@ void CPU::Reset()
 	m_F.Hex = 0x00;
 
 	// Set Memory to 0
-	memset(Read(MEMORY_START_ADDRESS), 0, MEMORY_SIZE);
+	memset(Read(RAM_START_ADDRESS), 0, RAM_SIZE);
 }
 
 void CPU::NMI()
@@ -254,7 +258,7 @@ void CPU::IRQ()
 {
 }
 
-bool CPU::Cycle()
+void CPU::Cycle(double waitTime)
 {
 	if (m_Cycles > 0)
 		m_Cycles--;
@@ -269,7 +273,7 @@ bool CPU::Cycle()
 	if (m_Instructions.find(opcode) == m_Instructions.end())
 	{
 		std::cout << "Could not find instruction for 0x" << std::hex << opcode << std::endl;
-		return false;
+		return;
 	}
 
 	m_CurrentInstruction = &m_Instructions[opcode];
@@ -280,7 +284,7 @@ bool CPU::Cycle()
 	m_Cycles += m_CurrentInstruction->Cycles;
 	m_CurrentInstruction->Func();
 
-	return true;
+	std::this_thread::sleep_for(std::chrono::microseconds((int)waitTime));
 }
 
 // Absolute only return 16 bit. rest return 8 bit
@@ -464,8 +468,8 @@ uint16_t CPU::GetAddress(uint16_t& ptr)
 uint16_t CPU::GetMirrorAddress(uint16_t address) const
 {
 	// System memory mirroring
-	if (address >= MEMORY_START_ADDRESS && address <= MEMORY_MIRROR_END_ADDRESS)
-		return address & MEMORY_END_ADDRESS;
+	if (address >= RAM_START_ADDRESS && address <= RAM_MIRROR_END_ADDRESS)
+		return address & RAM_END_ADDRESS;
 
 	// PPU Registers
 	if (address >= PPU_REGISTERS_START_ADDRESS && address <= PPU_REGISTERS_MIRROR_END_ADDRESS)

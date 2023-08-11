@@ -1,11 +1,14 @@
 #pragma once
 
 #include "NES/CPU.h"
-#include "NES/Bus.h"
-#include "NES/RAM.h"
+#include "NES/PPU/PPU.h"
 
 const double CPU_CLOCK_SPEED_HZ = 1790000.0;
 const double CPU_TIME_PER_INSTRUCTION_SEC = 1.0 / CPU_CLOCK_SPEED_HZ;
+const unsigned int MICROSECONDS_CONVERSION = 1000000;
+
+const double PPU_CLOCK_SPEED_HZ = CPU_CLOCK_SPEED_HZ * 3;
+const double PPU_TIME_PER_INSTRUCTION_SEC = 1.0 / CPU_CLOCK_SPEED_HZ;
 
 class NES
 {
@@ -16,6 +19,5 @@ public:
 	void OnUpdate(double deltaTime);
 private:
 	CPU* m_CPU;
-	RAM m_RAM;
-	Bus m_Bus;
+	PPU* m_PPU;
 };
