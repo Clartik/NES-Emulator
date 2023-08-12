@@ -17,6 +17,8 @@ public:
 	~NES();
 
 	void OnUpdate(double deltaTime);
+
+	void LoadROM(const std::string& filepath);
 private:
 	CPU* m_CPU;
 	PPU* m_PPU;

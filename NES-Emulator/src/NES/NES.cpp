@@ -3,8 +3,10 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
+#include <fstream>
 
 #include "NES/Memory.h"
+#include "NES/ROM.h"
 
 NES::NES()
 {
@@ -18,6 +20,7 @@ NES::NES()
 	cpuBus->Add(m_PPU);
 
 	ppuBus->Add(new Memory(VRAM_START_ADDRESS, VRAM_SIZE));
+	ppuBus->Add(new Memory(VRAM_START_ADDRESS, VRAM_SIZE));
 
 	m_CPU->Reset();
 }
@@ -25,6 +28,7 @@ NES::NES()
 NES::~NES()
 {
 	delete m_CPU;
+	delete m_PPU;
 }
 
 void NES::OnUpdate(double deltaTime)
@@ -38,4 +42,23 @@ void NES::OnUpdate(double deltaTime)
 	}
 
 	cpuThread.join();
+}
+
+void NES::LoadROM(const std::string& filepath)
+{
+	// Start at end of file
+	std::ifstream file(filepath, std::ifstream::ate | std::ifstream::binary);
+
+	if (!file)
+	{
+		std::cout << "Could not read " << filepath << std::endl;
+		return;
+	}
+
+	unsigned int size = file.tellg();
+	file.close();
+
+	ROM* rom = new ROM(filepath, size);
+
+	m_CPU->GetBus()->Add()
 }

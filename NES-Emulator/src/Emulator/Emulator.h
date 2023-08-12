@@ -1,5 +1,8 @@
 #pragma once
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include "NES/NES.h"
 
 class Emulator
@@ -12,5 +15,9 @@ public:
 private:
 	bool m_Running = true;
 
-	NES* m_NES;
+	double m_LastFrameTime = 0, m_CurrentFrameTime = 0;
+
+	GLFWwindow* m_Window = nullptr;
+
+	NES* m_NES = nullptr;
 };
