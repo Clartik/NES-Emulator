@@ -59,6 +59,5 @@ void NES::LoadROM(const std::string& filepath)
 	file.close();
 
 	ROM* rom = new ROM(filepath, size);
-
-	m_CPU->GetBus()->Add()
+	m_CPU->GetBus()->Add(rom);
 }

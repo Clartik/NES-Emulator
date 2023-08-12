@@ -2,24 +2,31 @@
 
 #include <cstring>
 #include <iostream>
+#include <fstream>
 
 // TODO: Add NES 2.0 format support
 
-ROM::ROM(uint16_t startAddress, uint8_t* data, unsigned int size)
-	: Peripheral(startAddress, startAddress + size)
+ROM::ROM(const std::string& filepath, unsigned int size)
+	: Peripheral(ROM_START_ADDRESS, ROM_START_ADDRESS + (size - 1))
 {
 	m_Data = new uint8_t[size];
-	Load(data, size);
+
+	std::ifstream file(filepath, std::ios::binary);
+	file.read((char*)m_Data, size);
+	file.close();
+
+	Load();
 }
 
 ROM::~ROM()
 {
 	delete[] m_Data;
+	delete m_Mapper;
 }
 
-void ROM::Load(uint8_t const* data, unsigned int size)
+void ROM::Load()
 {
-	memcpy(m_Data, data, size);
+	uint8_t* data = m_Data;
 
 	#pragma region Header
 
@@ -37,7 +44,7 @@ void ROM::Load(uint8_t const* data, unsigned int size)
 	bool batteryExists = flag6 & 0x02;			// 0x6000 - 0x7FFF
 	bool trainerExists = flag6 & 0x04;				// 512 Byte (0x7000 - 0x71FF)
 	bool ignoreMirror = flag6 & 0x08;			// If ignored, it provides a four screen vram
-	uint8_t mapperNybbleLo = flag6 & 0xF0;			// Only 4 bit
+	uint8_t mapperLo = flag6 & 0xF0;			// Only 4 bit
 
 	data++;
 	
@@ -47,7 +54,7 @@ void ROM::Load(uint8_t const* data, unsigned int size)
 	bool vsUniSystem = flag7 & 0x01;
 	bool playChoice10 = flag7 & 0x02;
 	uint8_t flags8To15 = flag7 & 0x0C;			// If equal to 2, flags 8 to 15 are in NES 2.0 format
-	uint8_t mapperNybbleHi = flag7 & 0xF0;
+	uint8_t mapperHi = flag7 & 0xF0;
 
 	data++;
 
@@ -79,9 +86,8 @@ void ROM::Load(uint8_t const* data, unsigned int size)
 	const uint8_t finalPRGSize = PRG_BASE_SIZE * prgSize;
 
 	m_PRGStart = data;
+	m_PRGSize = finalPRGSize;
 	data += finalPRGSize;
-	m_PRGEnd = data - 1;
-
 
 	// CHR RAM
 	if (!chrSize)
@@ -93,15 +99,31 @@ void ROM::Load(uint8_t const* data, unsigned int size)
 		const uint8_t finalCHRSize = CHR_BASE_SIZE * chrSize;
 
 		m_CHRStart = data;
+		m_CHRSize = finalCHRSize;
 		data += finalCHRSize;
-		m_CHREnd = data - 1;
 	}
 
 	// Ignoring Playchoice INST-ROM and PROM
+
+	uint8_t mapperByte = (mapperHi << 4) | mapperLo;
+	SetMapper(mapperByte);
+}
+
+void ROM::SetMapper(uint8_t mapperByte)
+{
+	switch (mapperByte)
+	{
+	case 0:
+		m_Mapper = new Mapper0(*m_PRGStart, m_PRGSize);
+		break;
+	default:
+		break;
+	}
 }
 
 uint8_t& ROM::Read(uint16_t address)
 {
+	address = m_Mapper->GetAddress(address);
 	return m_Data[address];
 }
 
