@@ -1,0 +1,3 @@
+﻿  NES.cpp
+C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\NES.cpp(58,20): warning C4244: 'initializing': conversion from 'std::streamoff' to 'unsigned int', possible loss of data
+  NES.vcxproj.vcxproj -> C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\bin\Debug-x64\NES\NES.lib
