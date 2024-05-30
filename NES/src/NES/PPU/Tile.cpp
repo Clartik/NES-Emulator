@@ -1,6 +1,5 @@
+#include "pch.h"
 #include "Tile.h"
-
-#include <cstring>
 
 Tile::Tile(uint8_t* data)
 {

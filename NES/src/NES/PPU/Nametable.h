@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 #include "Base/Peripheral.h"
 
 const unsigned int NAMETABLE_SIZE = 960;

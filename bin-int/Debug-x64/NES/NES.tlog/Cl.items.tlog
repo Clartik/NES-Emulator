@@ -7,3 +7,4 @@ C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NE
 C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\PPU\Tile.cpp;C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\bin-int\Debug-x64\NES\Tile.obj
 C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\ROM\Mapper.cpp;C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\bin-int\Debug-x64\NES\Mapper.obj
 C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\ROM\ROM.cpp;C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\bin-int\Debug-x64\NES\ROM.obj
+C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\pch.cpp;C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\bin-int\Debug-x64\NES\pch.obj

@@ -1,6 +1,5 @@
+#include "pch.h"
 #include "Bus.h"
-
-#include <iostream>
 
 Bus::Bus()
 {

@@ -1,8 +1,5 @@
+#include "pch.h"
 #include "CPU.h"
-
-#include <iostream>
-#include <thread>
-#include <chrono>
 
 CPU::CPU()
 	: BusController(new Bus)

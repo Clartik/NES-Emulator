@@ -1,3 +1,28 @@
-﻿  NES.cpp
-C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\NES.cpp(58,20): warning C4244: 'initializing': conversion from 'std::streamoff' to 'unsigned int', possible loss of data
+﻿  CPU.cpp
+C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\CPU.cpp(235,20): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file '/src/NES/CPU.cpp')
+  
+C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\CPU.cpp(242,9): warning C4305: '=': truncation from 'const unsigned int' to 'uint8_t'
+  (compiling source file '/src/NES/CPU.cpp')
+  
+C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\CPU.cpp(242,9): warning C4309: '=': truncation of constant value
+  (compiling source file '/src/NES/CPU.cpp')
+  
+C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\CPU.cpp(360,20): warning C4244: 'initializing': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+  (compiling source file '/src/NES/CPU.cpp')
+  
+C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\CPU.cpp(376,20): warning C4244: 'initializing': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+  (compiling source file '/src/NES/CPU.cpp')
+  
+C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\CPU.cpp(518,13): warning C4244: 'initializing': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+  (compiling source file '/src/NES/CPU.cpp')
+  
+C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\CPU.cpp(614,14): warning C4244: 'argument': conversion from 'uint16_t' to 'uint8_t', possible loss of data
+  (compiling source file '/src/NES/CPU.cpp')
+  
+  NES.cpp
+C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\NES\src\NES\NES.cpp(54,20): warning C4244: 'initializing': conversion from 'std::streamoff' to 'unsigned int', possible loss of data
+  (compiling source file '/src/NES/NES.cpp')
+  
+  Generating Code...
   NES.vcxproj.vcxproj -> C:\Users\ygkar\Desktop\Projects\Visual Studio Projects\Emulators\NES-Emulator\bin\Debug-x64\NES\NES.lib

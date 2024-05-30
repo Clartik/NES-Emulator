@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 // Peripheral is a generic class that the Bus can use to communicate
 class Peripheral
 {

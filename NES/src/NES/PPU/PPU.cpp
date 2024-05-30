@@ -1,8 +1,5 @@
+#include "pch.h"
 #include "PPU.h"
-
-#include <iostream>
-#include <thread>
-#include <chrono>
 
 // StartAddress + size - 1 because startAddress is the start and size - 1 is the end
 PPU::PPU(uint16_t startAddress)

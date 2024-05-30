@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 const unsigned int KB_TO_BYTES = 1024;
 
 class Mapper

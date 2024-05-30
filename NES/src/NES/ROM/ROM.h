@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-#include <string>
-
 #include "Base/Peripheral.h"
 
 #include "Mapper.h"

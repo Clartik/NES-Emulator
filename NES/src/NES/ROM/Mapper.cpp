@@ -1,6 +1,5 @@
+#include "pch.h"
 #include "Mapper.h"
-
-#include <iostream>
 
 Mapper0::Mapper0(uint16_t prgStartAddress, unsigned int prgSize)
     : Mapper(prgStartAddress, prgSize)

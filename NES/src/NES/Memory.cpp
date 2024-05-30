@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Memory.h"
 
 Memory::Memory(uint16_t startAddress, unsigned int size)

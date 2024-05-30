@@ -158,10 +158,12 @@
   <ItemGroup>
     <ClCompile Include="src\Emulator.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="vendor\glad\src\glad.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Emulator.h" />
+    <ClInclude Include="src\Renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NES\NES.vcxproj.vcxproj">

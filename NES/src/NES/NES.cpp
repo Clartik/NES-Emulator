@@ -1,9 +1,5 @@
+#include "pch.h"
 #include "NES.h"
-
-#include <chrono>
-#include <thread>
-#include <iostream>
-#include <fstream>
 
 #include "Memory.h"
 #include "ROM/ROM.h"

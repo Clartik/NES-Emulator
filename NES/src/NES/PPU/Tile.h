@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 const unsigned int PLANE_SIZE = 8;
 const unsigned int TILE_SIZE = PLANE_SIZE * 2;
 

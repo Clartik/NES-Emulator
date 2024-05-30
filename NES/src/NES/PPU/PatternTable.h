@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 #include "Tile.h"
 
 const unsigned int PATTERN_TABLE_TILE_AMOUNT = 256;

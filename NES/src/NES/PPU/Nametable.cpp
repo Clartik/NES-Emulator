@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Nametable.h"
 
 Nametable::Nametable(uint16_t startAddress)
