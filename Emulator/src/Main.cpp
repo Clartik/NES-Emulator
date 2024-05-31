@@ -1,11 +1,9 @@
-#include "Emulator.h"
-
-#include <iostream>
+#include "Core/Application.h"
 
 int main()
 {
-	Emulator* app = new Emulator;
+	Application* app = new Application(WindowProps("NES Emulator"));
 	app->Run();
-	std::cin.get();
+
 	delete app;
 }
